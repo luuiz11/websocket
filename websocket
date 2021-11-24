@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[ ]:
+
+
+import socket
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(('irc.rizon.net', 6667))
+
+def enviando(sock, comando):
+    comando += '\r\n'
+    sock.send(comando.encode('UTF-8'))
+    
+def registra(sock, nick):
+    enviando(sock, 'NICK {}'.format(nick))
+    enviando(sock, 'USER {0} {0} {0} :{0}'.format(nick))
+    
+
+def checa_ping(sock, msg):
+    if 'PING :' in msg:
+        codigo_ping = msg.split('PING :')[-1]
+        resposta_pong = 'PONG :{}'.format(codigo_ping)
+        enviando(sock, resposta_pong)
+
+registra(s, 'BotWebSocket')
+enviando(s, 'JOIN #minha-empresa')
+
+while True:
+    msg = s.recv(2048).decode('UTF-8')
+    print(msg)
+    
+    checa_ping(s, msg)
+
+
+# In[ ]:
+
